@@ -1,0 +1,10 @@
+asgiref==3.5.0
+click==8.0.3
+colorama==0.4.4
+h11==0.13.0
+httptools==0.3.0
+python-dotenv==0.19.2
+PyYAML==6.0
+uvicorn==0.17.4
+watchgod==0.7
+websockets==10.1
