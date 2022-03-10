@@ -26,6 +26,7 @@ def root():
     return {"message": "Welcome to my API"}
 
 
+
 @app.get("/post")
 def get_post():
     return {"data": "This is a post"}
