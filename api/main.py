@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional
 from xmlrpc.client import boolean
-from fastapi import Body, FastAPI, Query
+from fastapi import Body, Cookie, FastAPI, Query, Path, Header
 from pydantic import BaseModel
 
 app = FastAPI()
@@ -56,7 +56,7 @@ def read_user_item(user_id: int, item_id: int, q: Optional[str] = Query(None, ma
     
 
 @app.get("/sample_post/{post}")
-def sample_post(post: str, q: Optional[str] = None, state: boolean = False):
+def sample_post(*, post: str = Path(..., title="The ID of post to get"), q: Optional[str] = None, state: boolean = False):
     post = {"Message": post}
     if state:
         post["Message"] = "Message not supported"
@@ -66,3 +66,13 @@ def sample_post(post: str, q: Optional[str] = None, state: boolean = False):
 @app.get("/user")
 def get_user(payload: User):
     return {"Payload": payload}
+
+
+@app.get("/getCookie/")
+async def getCookie(ads_id: Optional[str] = Cookie(None)):
+    return {"ads_id": ads_id}
+
+
+@app.get("/getHeader/")
+async def getCookie(user_agent: Optional[str] = Header(None)):
+    return {"user_agent": user_agent}
