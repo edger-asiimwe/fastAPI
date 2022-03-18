@@ -1,9 +1,14 @@
+from email import header
 from enum import Enum
+from http.client import HTTPException
 from os import stat
 from typing import Optional
+from urllib.request import Request
 from xmlrpc.client import boolean
-from fastapi import Body, Cookie, FastAPI, Query, Path, Header, status, Form
+from fastapi import Body, Cookie, FastAPI, Query, Path, Header, status, Form, HTTPException, Request
 from pydantic import BaseModel
+from fastapi.responses import JSONResponse, PlainTextResponse
+from fastapi.exceptions import RequestValidationError
 
 app = FastAPI()
 
@@ -28,15 +33,42 @@ class Payment(BaseModel):
     first_name: str
     last_name: str
 
+book_titles = {
+    "The Lord of the Rings": "J. R. R. Tolkien",
+    "Le Petit Prince": "Antoine de Saint-Exupéry",
+    "Harry Potter and the Philosopher's Stone": "J. K. Rowling",
+    "And Then There Were None": "Agatha Christie",
+    "Dream of the Red Chamber": "Cao Xueqin",
+}
 
+
+class UnicornException(Exception):
+    def __init__(self, name: str):
+        self.name = name
+
+
+@app.exception_handler(UnicornException)
+async def unicorn_exception_handler(request: Request, exc: UnicornException):
+    return JSONResponse(
+        status_code=404,
+        content={"message": f"Oppps! {exc.name} did something wrong"}, 
+        headers={"X-Error": "Wow, finally made my own error exception handler"}
+    )
+
+@app.exception_handler(RequestValidationError)
+async def http_exception_handler(request, exc):
+    return PlainTextResponse(str(exc), status_code=exc.status_code)
+
+    
 @app.get("/", status_code=status.HTTP_200_OK)
 def root():
     return {"message": "Welcome to my API"}
 
 
-@app.post(".login", status_code=status.HTTP_200_OK)
+@app.post("/login", status_code=status.HTTP_200_OK)
 def login(username: str = Form(...), password: str = Form(...)):
     return {"Username": username, "Password": password}
+
 
 @app.get("/post", status_code=status.HTTP_200_OK)
 def get_post():
@@ -92,3 +124,10 @@ async def getCookie(user_agent: Optional[str] = Header(None)):
 @app.get("/getPayement/", response_model=Payment, status_code=status.HTTP_200_OK)
 def getPayement(pay: Payment):
     return pay
+
+
+@app.get("/get_book/{title}", status_code=status.HTTP_200_OK)
+def getBook(title: str):
+    if title not in book_titles:
+        raise UnicornException(name=title)
+    return {"Author": book_titles.get(title)}
