@@ -2,7 +2,7 @@ from enum import Enum
 from os import stat
 from typing import Optional
 from xmlrpc.client import boolean
-from fastapi import Body, Cookie, FastAPI, Query, Path, Header, status
+from fastapi import Body, Cookie, FastAPI, Query, Path, Header, status, Form
 from pydantic import BaseModel
 
 app = FastAPI()
@@ -34,6 +34,9 @@ def root():
     return {"message": "Welcome to my API"}
 
 
+@app.post(".login", status_code=status.HTTP_200_OK)
+def login(username: str = Form(...), password: str = Form(...)):
+    return {"Username": username, "Password": password}
 
 @app.get("/post", status_code=status.HTTP_200_OK)
 def get_post():
