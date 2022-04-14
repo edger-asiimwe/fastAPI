@@ -59,7 +59,7 @@ async def unicorn_exception_handler(request: Request, exc: UnicornException):
 async def http_exception_handler(request, exc):
     return PlainTextResponse(str(exc), status_code=exc.status_code)
 
-    
+
 @app.get("/", status_code=status.HTTP_200_OK)
 def root():
     return {"message": "Welcome to my API"}
